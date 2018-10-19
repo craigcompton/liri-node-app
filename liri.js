@@ -1,37 +1,83 @@
-require("dotenv").config();
+require('dotenv').config();
+var inquirer = require("inquirer");
+var fs = require("fs");
+var moment = require('moment');
+var Spotify = require('node-spotify-api');
+var rp = require('request-promise');
+var task = process.argv[2];
+var queryText = process.argv[3];
+var keys = require("./keys.js");
 
-var keys = require("keys.js");
+// moment().format();
 
+
+
+// queryText = "i write sins not tragedies";
 
 // concert-this
 // spotify-this-song
 // movie-this
 // do-what-it-says
 
-// What Each Command Should Do
+switch (task) {
+	case "concert-this":
+	concertFunction(queryText);
+	break;
 
-// node liri.js concert-this <artist/band name here>
+	case "spotify-this-song":
+	spotifyFunction(queryText);
+	break;
 
-// This will search the Bands in Town Artist Events API ("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp") for an artist and render the following information about each event to the terminal:
+	case "movie-this":
+	movieFunction(queryText);
+	break;
 
-// Name of the venue
-// Venue location
-// Date of the Event (use moment to format this as "MM/DD/YYYY")
+	case "do-what-it-says":
+	whatFunction();
+	break;
+};
 
-// ---------------------------------------------
+// Function for Bands In Town - concert API
+var concertFunction = function (queryText) {
+    var queryURL = "https://rest.bandsintown.com/artists/" + queryText + "/events?app_id=codingbootcamp";
 
-// node liri.js spotify-this-song '<song name here>'
+    $.ajax({
+        url: queryURL,
+        method: "GET"
+    }).then(function (response) {
+        console.log('\n' + queryText + " will be playing at the " + response.venue + " in " + response.venue.city + " at " + moment(response.datetime).format("dddd, MMMM Do YYYY, h:mm a"));
+    });
+};
 
-// This will show the following information about the song in your terminal/bash window
+// Function for Node-Spotify-API
+var spotifyFunction = function(queryText) {
 
-// Artist(s)
-// The song's name
-// A preview link of the song from Spotify
-// The album that the song is from
+	var spotify = new Spotify(keys.spotifyKeys);
+		if (!queryText){
+        	queryText = 'The Sign';
+    	}
+		spotify.search({ type: 'track', query: queryText }, function(err, data) {
+			if (err){
+	            console.log('Error occurred: ' + err);
+	            return;
+	        }
 
-// node liri.js spotify-this-song '<song name here>'
+	        var songInfo = data.tracks.items;
+	        console.log("\nArtist: " + songInfo[0].artists[0].name);
+	        console.log("\nSong's Name: " + songInfo[0].name);
+	        console.log("\nPreview Link fromSpotify: " + songInfo[0].preview_url);
+	        console.log("\nAlbum that the song is from: " + songInfo[0].album.name);
+	});
+}
 
-// If no song is provided then your program will default to "The Sign" by Ace of Base.
+// 
+var movieFunction = function (queryText) {
+
+};
+
+var whatFunction = function (queryText) {
+
+};
 
 // ----------------------------------
 // node liri.js movie-this '<movie name here>'
